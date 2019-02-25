@@ -189,21 +189,21 @@ NOTE: We could make this a bit more resilient in a future iteration of this tuto
 customer => 503 preference => I/O error on GET request for "http://recommendation:8080": recommendation; nested exception is java.net.UnknownHostException: recommendation
 ----
 
-and check out the logs
+也可以查看日志
 
 [source,bash]
 ----
 stern $(kubectl get pods|grep preference|awk '{ print $1 }'|head -1) -c preference
 ----
 
-You should see a stacktrace containing this cause:
+应该看到有如下错误输出:
 
 [source,bash]
 ----
 org.springframework.web.client.ResourceAccessException: I/O error on GET request for "http://recommendation:8080": recommendation; nested exception is java.net.UnknownHostException: recommendation
 ----
 
-Back to the main istio-tutorial directory
+返回 istio-tutorial 主目录
 
 [source,bash]
 ----
@@ -211,7 +211,7 @@ cd ../../..
 ----
 
 [#deployrecommendation]
-== Deploy recommendation
+== 部署 recommendation
 
 IMPORTANT: The tag `v1` at the end of the image name matters. We will be creating a `v2` version of `recommendation` later in this tutorial. Having both a `v1` and `v2` version of the `recommendation` code will allow us to exercise some interesting aspects of Istio's capabilities.
 
