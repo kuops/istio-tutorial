@@ -1,7 +1,7 @@
 = Setup
 include::_attributes.adoc[]
 
-[依赖工具]
+## 依赖工具
 - kubernetes
 - docker
 - istio
