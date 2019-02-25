@@ -106,7 +106,7 @@ docker push kuopsme/reahat.istio.preference:v1
 
 sed -i 's@example/preference:v1@kuopsme/reahat.istio.preference:v1@g'  ../../kubernetes/Deployment.yml
 kubectl apply -f <(istioctl kube-inject -f ../../kubernetes/Deployment.yml) -n tutorial
-kubectl create -f ../../kubernetes/Service.yml
+kubectl create -f ../../kubernetes/Service.yml -n tutorial
 ----
 
 === 等待 preference 部署完毕
