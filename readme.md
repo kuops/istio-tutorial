@@ -1,4 +1,4 @@
-= Java (Spring Boot, Vert.x and Microprofile) + Istio on Kubernetes
+# Java (Spring Boot, Vert.x and Microprofile) + Istio on Kubernetes
 
 redhat 的 java istio demo 演示服务
 
@@ -8,17 +8,17 @@ redhat 的 java istio demo 演示服务
 customer → preference → recommendation
 ```
 
-toc::[]
+
 
 [1.环境准备](documentation/modules/ROOT/pages/1setup.adoc)
 
-include::documentation/modules/ROOT/pages/2deploy-microservices.adoc[2.部署微服务]
+[2.部署微服务](documentation/modules/ROOT/pages/2deploy-microservices.adoc)
 
-include::documentation/modules/ROOT/pages/3monitoring-tracing.adoc[3.监控和跟踪]
+[3.监控和跟踪](documentation/modules/ROOT/pages/3monitoring-tracing.adoc)
 
-include::documentation/modules/ROOT/pages/4simple-routerules.adoc[4.简单的路由]
+[4.简单的路由](documentation/modules/ROOT/pages/4simple-routerules.adoc)
 
-include::documentation/modules/ROOT/pages/4advanced-routerules.adoc[5.高级路由]
+[5.高级路由](documentation/modules/ROOT/pages/4advanced-routerules.adoc)
 
 include::documentation/modules/ROOT/pages/6fault-injection.adoc[]
 
