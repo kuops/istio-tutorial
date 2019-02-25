@@ -36,24 +36,8 @@ Now let's deploy the customer pod with its sidecar
 
 [source,bash,subs="+macros,+attributes"]
 ----
-oc apply -f <(istioctl kube-inject -f link:{github-repo}/{customer-repo}/kubernetes/Deployment.yml[../../kubernetes/Deployment.yml]) -n tutorial
-oc create -f link:{github-repo}/{customer-repo}/kubernetes/Service.yml[../../kubernetes/Service.yml] -n tutorial
-
-or
-
 kubectl apply -f <(istioctl kube-inject -f link:{github-repo}/{customer-repo}/kubernetes/Deployment.yml[../../kubernetes/Deployment.yml]) -n tutorial
 kubectl create -f link:{github-repo}/{customer-repo}/kubernetes/Service.yml[../../kubernetes/Service.yml] -n tutorial
-----
-
-=== Customer build using OpenShift S2I strategy
-
-[source, bash]
-----
-cd customer/java/springboot
-oc new-app --name=customer --context-dir=customer/java/springboot -e JAEGER_SERVICE_NAME=customer JAEGER_ENDPOINT=http://jaeger-collector.istio-system.svc:14268/api/traces JAEGER_PROPAGATION=b3 JAEGER_SAMPLER_TYPE=const JAEGER_SAMPLER_PARAM=1 JAVA_OPTIONS='-Xms128m -Xmx256m -Djava.net.preferIPv4Stack=true' fabric8/s2i-java~https://github.com/redhat-developer-demos/istio-tutorial -o yaml  > customer.yml
-oc apply -f <(istioctl kube-inject -f customer.yml) -n tutorial
-oc delete svc/customer -n tutorial; oc create -f ../../kubernetes/Service.yml -n tutorial
-oc logs bc/customer -f -n tutorial
 ----
 
 === Expose customer
