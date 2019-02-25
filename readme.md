@@ -19,6 +19,8 @@ customer → preference → recommendation
 
 [5.高级路由](documentation/modules/ROOT/pages/4advanced-routerules.adoc)
 
+[6.断路器](documentation/modules/ROOT/pages/5circuit-breaker.adoc)
+
 include::documentation/modules/ROOT/pages/6fault-injection.adoc[]
 
 include::documentation/modules/ROOT/pages/7circuit-breaker.adoc[]
