@@ -70,13 +70,6 @@ istio_requests_total{destination_service="recommendation.tutorial.svc.cluster.lo
 点击 `Execute`
 
 
-Then run several requests through the system
-
-[source,bash,subs="+macros,+attributes"]
-----
-while true; do curl customer-tutorial{namespace-suffix}.{appdomain}; sleep .5;  done
-----
-
 NOTE: You may have to refresh the browser for the Prometheus graph to update. And you may wish to make the interval 5m (5 minutes) as seen in the screenshot above.
 
 endif::workshop[]
