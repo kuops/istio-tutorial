@@ -5,6 +5,15 @@ include::_attributes.adoc[]
 - kubernetes
 - docker
 - istio
+```
+helm template istio-1.0.6/install/kubernetes/helm/istio --name istio \
+    --namespace istio-system \
+    --set global.mtls.enabled=true \
+    --set tracing.enabled=true \
+    --set servicegraph.enabled=true \
+    --set prometheus.enabled=true \
+    --set grafana.enabled=true > istio.yaml
+```
 - siege `apt-get install siege`
 - git `apt-get install git`
 - maven 
