@@ -2,164 +2,162 @@
 include::_attributes.adoc[]
 
 [IMPORTANT]
-.Before Start
+.开始之前
 ====
-You should have NO virtualservice nor destinationrule (in `tutorial` namespace) `istioctl get virtualservice` `istioctl get destinationrule` 
-if so run:
+清理之前的 tuorial namespace 中的 istio 资源
 
 [source, bash,subs="+macros,+attributes"]
 ----
-./scripts/clean.sh tutorial{namespace-suffix}
+./scripts/clean.sh tutorial
 ----
-====
+
+添加 mtls 认证，和 gateway
+
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "DestinationRule"
+metadata:
+  name: "default"
+  namespace: "tutorial"
+spec:
+  host: "*.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+EOF
+
+cat <<EOF | kubectl apply -f -
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: my-gateway
+  namespace: "tutorial"
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: customer
+  namespace: "tutorial"
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - my-gateway
+  http:
+  - route:
+    - destination:
+        host: customer
+        port:
+          number: 8080
+EOF
+```
 
 [#canarydeploymentuseragent]
 == Smart routing based on user-agent header (Canary Deployment)
 
-What is your user-agent?
-
-https://www.whoishostingthis.com/tools/user-agent/[https://www.whoishostingthis.com/tools/user-agent/]
-
-Note: the "user-agent" header is added to OpenTracing baggage in the Customer service. From
-there it is automatically propagated to all downstream services. To enable automatic
-baggage propagation all intermediate services have to be instrumented with OpenTracing.
-The baggage header for user agent has following form `baggage-user-agent: <value>`.
+通过 header 进行路由的演示服务
 
 [#alltorecommendationv1]
 === Set recommendation to all v1
 
+将所有 recommendation 服务的请求路由到 v1
+
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl create -f link:{github-repo}/{istiofiles-dir}/destination-rule-recommendation-v1-v2.yml[istiofiles/destination-rule-recommendation-v1-v2.yml] -n tutorial{namespace-suffix}
-istioctl create -f link:{github-repo}/{istiofiles-dir}/virtual-service-recommendation-v1.yml[istiofiles/virtual-service-recommendation-v1.yml] -n tutorial{namespace-suffix}
+istioctl create -f istiofiles/destination-rule-recommendation-v1-v2.yml -n tutorial
+istioctl create -f istiofiles/virtual-service-recommendation-v1.yml -n tutorial
 ----
 
 [#safaritov2]
 === Set Safari users to v2
 
-[source,bash,subs="+macros,+attributes"]
-----
-istioctl replace -f link:{github-repo}/{istiofiles-dir}/virtual-service-safari-recommendation-v2.yml[istiofiles/virtual-service-safari-recommendation-v2.yml] -n tutorial{namespace-suffix}
-
-istioctl get virtualservice -n tutorial{namespace-suffix}
-----
-
-and test with a Safari (or even Chrome on Mac since it includes Safari in the string). Safari only sees v2 responses from recommendation
-
-and test with a Firefox browser, it should only see v1 responses from recommendation.
-
-There are two ways to get the URL for your browser:
-
-Open the url http://customer-tutorial{namespace-suffix}.{appdomain} in your broswer 
-
-You can also attempt to use the curl -A command to test with different user-agent strings. 
+将 safari 用户的流量路由到 v2
 
 [source,bash,subs="+macros,+attributes"]
 ----
-curl -A Safari customer-tutorial{namespace-suffix}.{appdomain}
-curl -A Firefox customer-tutorial{namespace-suffix}.{appdomain}
+istioctl replace -f istiofiles/virtual-service-safari-recommendation-v2.yml -n tutorial
+
+istioctl get virtualservice -n tutorial
+
+curl -A Safari $INGRESS_HOST:$INGRESS_PORT
+#使用 Firfox 测试
+curl -A Firefox $INGRESS_HOST:$INGRESS_PORT
 ----
 
-You can describe the virtualservice to see its configuration
+可以查看详细的配置
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl get virtualservice -o yaml -n tutorial{namespace-suffix}
+istioctl get virtualservice -o yaml -n tutorial
 ----
 
 ==== Remove the Safari rule
 
+移除 safari 规则
+
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl delete -f istiofiles/virtual-service-safari-recommendation-v2.yml -n tutorial{namespace-suffix}
+istioctl delete -f istiofiles/virtual-service-safari-recommendation-v2.yml -n tutorial
 ----
 
 [#mobiletov2]
 === Set mobile users to v2
 
+将移动用户的流量路由到 v2 
+
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl create -f link:{github-repo}/{istiofiles-dir}/virtual-service-mobile-recommendation-v2.yml[istiofiles/virtual-service-mobile-recommendation-v2.yml] -n tutorial{namespace-suffix}
+istioctl create -f istiofiles/virtual-service-mobile-recommendation-v2.yml -n tutorial
 
-curl -A "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4(KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5" http://customer-tutorial{namespace-suffix}.{appdomain}
+curl -A "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4(KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5" $INGRESS_HOST:$INGRESS_PORT
 ----
 
 ==== Clean up
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl delete -f istiofiles/destination-rule-recommendation-v1-v2.yml -n tutorial{namespace-suffix}
-istioctl delete -f istiofiles/virtual-service-mobile-recommendation-v2.yml -n tutorial{namespace-suffix}
-----
-
-or you can run:
-
-[source, bash,subs="+macros,+attributes"]
-----
-./scripts/clean.sh tutorial{namespace-suffix}
+istioctl delete -f istiofiles/destination-rule-recommendation-v1-v2.yml -n tutorial
+istioctl delete -f istiofiles/virtual-service-mobile-recommendation-v2.yml -n tutorial
 ----
 
 
 [#mirroringtraffic]
 == Mirroring Traffic (Dark Launch)
 
-[source,bash,subs="+macros,+attributes"]
-----
-oc get pods -l app=recommendation -n tutorial{namespace-suffix}
-or 
-kubectl get pods -l app=recommendation -n tutorial{namespace-suffix}
-----
-
-You should have 2 pods for recommendation based on the steps above
+流量镜像
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl get virtualservice -n tutorial{namespace-suffix}
-istioctl get destinationrule
+istioctl create -f istiofiles/destination-rule-recommendation-v1-v2.yml -n tutorial
+istioctl create -f istiofiles/virtual-service-recommendation-v1-mirror-v2.yml -n tutorial
+
+curl $INGRESS_HOST:$INGRESS_PORT
 ----
 
-
-You should have NO virtualservice nor destinationrule (in `tutorial` namespace) `istioctl get virtualservice` `istioctl get destinationrule` 
-if so run:
-
-[source, bash,subs="+macros,+attributes"]
-----
-./scripts/clean.sh tutorial{namespace-suffix}
-----
-
-
-Make sure you are in the main directory of "istio-tutorial"
-
-[source,bash,subs="+macros,+attributes"]
-----
-istioctl create -f link:{github-repo}/{istiofiles-dir}/destination-rule-recommendation-v1-v2.yml[istiofiles/destination-rule-recommendation-v1-v2.yml] -n tutorial{namespace-suffix}
-istioctl create -f link:{github-repo}/{istiofiles-dir}/virtual-service-recommendation-v1-mirror-v2.yml[istiofiles/virtual-service-recommendation-v1-mirror-v2.yml] -n tutorial{namespace-suffix}
-
-curl customer-tutorial{namespace-suffix}.{appdomain}
-----
-
-Check the logs of recommendation-v2
+查看 recommendation-v2 的log
 
 [source,bash]
 ----
-oc logs -f `oc get pods|grep recommendation-v2|awk '{ print $1 }'` -c recommendation
-or
-kubectl logs -f `oc get pods|grep recommendation-v2|awk '{ print $1 }'` -c recommendation
+kubectl logs -f `kubectl get pods|grep recommendation-v2|awk '{ print $1 }'` -c recommendation
 ----
 
 === Clean up
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl delete -f istiofiles/destination-rule-recommendation-v1-v2.yml -n tutorial{namespace-suffix}
-istioctl delete -f istiofiles/virtual-service-recommendation-v1-mirror-v2.yml -n tutorial{namespace-suffix}
-----
-
-or you can run:
-
-[source, bash,subs="+macros,+attributes"]
-----
-./scripts/clean.sh tutorial{namespace-suffix}
+istioctl delete -f istiofiles/destination-rule-recommendation-v1-v2.yml -n tutorial
+istioctl delete -f istiofiles/virtual-service-recommendation-v1-mirror-v2.yml -n tutorial
 ----
 
 
