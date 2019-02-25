@@ -2,7 +2,7 @@
 include::_attributes.adoc[]
 
 [#deploycustomer]
-== Deploy customer
+## Deploy customer
 
 创建 tutorial namespace 
 
@@ -20,7 +20,7 @@ git clone https://github.com/redhat-developer-demos/istio-tutorial
 cd istio-tutorial
 ----
 
-=== 构建 docker 镜像
+### 构建 docker 镜像
 
 NOTE: Your very first Docker build will take a bit of time as it downloads all the layers. Subsequent rebuilds of the Docker image, updating only the microservice layer will be very fast.
 
