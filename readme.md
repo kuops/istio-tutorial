@@ -9,7 +9,6 @@ customer → preference → recommendation
 ```
 
 
-
 [1.环境准备](documentation/modules/ROOT/pages/1setup.adoc)
 
 [2.部署微服务](documentation/modules/ROOT/pages/2deploy-microservices.adoc)
