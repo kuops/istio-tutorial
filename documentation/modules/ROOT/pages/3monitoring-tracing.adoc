@@ -42,24 +42,19 @@ ifndef::workshop[]
 [#custommetrics]
 == Custom Metrics
 
-Istio also allows you to specify custom metrics which can be seen inside of the Prometheus dashboard
+Istio还允许您指定可在Prometheus仪表板内查看的自定义指标，
 
 [source,bash,subs="+macros,+attributes"]
 ----
-ifdef::workshop[]
-open http://prometheus-istio-system.{appdomain}/graph?g0.range_input=5m&g0.expr=&g0.tab=0"
-endif::workshop[]
 
-ifndef::workshop[]
-open "$(minishift openshift service prometheus -u)/graph?g0.range_input=5m&g0.expr=&g0.tab=0"
-endif::workshop[]
+http://nodeip:32040/graph?g0.range_input=1m&g0.stacked=1&g0.expr=&g0.tab=0
 ----
 
-Add the custom metric and rule. First make sure you are in the "istio-tutorial" directory and then
+添加一个自定义的 metric 和 rule. 首先你应该再 istio-tutorial 主目录
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl create -f link:{github-repo}/{istiofiles-dir}/recommendation_requestcount.yml[istiofiles/recommendation_requestcount.yml] -n istio-system
+istioctl create -f istiofiles/recommendation_requestcount.yml -n istio-system
 ----
 
 In the Prometheus dashboard, add the following
