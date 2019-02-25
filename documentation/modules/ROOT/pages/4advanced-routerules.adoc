@@ -1,7 +1,7 @@
 = Advanced Route Rules
 include::_attributes.adoc[]
 
-[IMPORTANT]
+
 开始之前
 
 清理之前的 tuorial namespace 中的 istio 资源
