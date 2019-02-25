@@ -9,8 +9,8 @@ include::_attributes.adoc[]
 - git `apt-get install git`
 - maven 
 ```
-apt-get install maven
-echo "export JAVA_HOME=/usr/lib/jvm/default-java" > /etc/profile.d/maven.sh
+apt-get install maven openjdk-8-jdk
+echo "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64" > /etc/profile.d/maven.sh
 source  /etc/profile.d/maven.sh
 ```
 - https://github.com/wercker/stern[stern] 
