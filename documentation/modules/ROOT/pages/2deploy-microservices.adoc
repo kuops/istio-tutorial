@@ -30,6 +30,7 @@ cd customer/java/springboot
 mvn clean package
 docker build -t docker build -t kuopsme/reahat.istio.customer .
 docker images | grep reahat.istio.customer
+docker push kuopsme/reahat.istio.customer
 ----
 
 Now let's deploy the customer pod with its sidecar
