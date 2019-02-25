@@ -83,8 +83,6 @@ customer => preference => recommendation v1 from '76d747d99f-25h79': 181
 customer => preference => recommendation v2 from 'bbb595df6-gm8v4': 4
 ```
 
-
-
 [source, bash, subs="+macros,+attributes"]
 ----
 ./scripts/run.sh http://customer-tutorial{namespace-suffix}.{appdomain}
@@ -197,52 +195,49 @@ curl $INGRESS_HOST:$INGRESS_PORT
 [#canarydeploymentrecommendation]
 === Canary deployment: Split traffic between v1 and v2
 
-Canary Deployment scenario: push v2 into the cluster but slowly send end-user traffic to it, if you continue to see success, continue shifting more traffic over time
+Canary 部署方案：将 v2 推入群集但缓慢地向其发送最终用户流量，如果您继续看到成功，则继续随时间推移更多流量
 
 [source,bash,subs="+macros,+attributes"]
 ----
-$ oc get pods -l app=recommendation -n tutorial{namespace-suffix}
-or
-$ kubectl get pods -l app=recommendation -n tutorial{namespace-suffix}
-
-NAME                                  READY     STATUS    RESTARTS   AGE
-recommendation-v1-3719512284-7mlzw   2/2       Running   6          2h
-recommendation-v2-2815683430-vn77w   2/2       Running   0          1h
+# kubectl get pods -l app=recommendation -n tutorial
+NAME                                 READY   STATUS    RESTARTS   AGE
+recommendation-v1-76d747d99f-25h79   2/2     Running   0          3h16m
+recommendation-v2-bbb595df6-gm8v4    2/2     Running   0          38m
 ----
 
-Create the `virtualservice` that will send 90% of requests to v1 and 10% to v2
+创建一个 `virtualservice` 将 90% 的请求发送到 v1 , 10% 到 v2
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl create -f link:{github-repo}/{istiofiles-dir}/virtual-service-recommendation-v1_and_v2.yml[istiofiles/virtual-service-recommendation-v1_and_v2.yml] -n tutorial{namespace-suffix}
+istioctl create -f istiofiles/virtual-service-recommendation-v1_and_v2.yml -n tutorial
 ----
 
-and send in several requests:
+发送请求测试
 
 [source, bash,subs="+macros,+attributes"]
 ----
-./scripts/run.sh http://customer-tutorial{namespace-suffix}.{appdomain}
+for i in `seq 1 20`;do curl $INGRESS_HOST:$INGRESS_PORT;sleep 1;done
 ----
 
-In another terminal, change the mixture to be 75/25
+将发送流量比改为 `v1` 为 75%, `v2` 为 25%
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl replace -f link:{github-repo}/{istiofiles-dir}/virtual-service-recommendation-v1_and_v2_75_25.yml[istiofiles/virtual-service-recommendation-v1_and_v2_75_25.yml] -n tutorial{namespace-suffix}
+istioctl replace -f istiofiles/virtual-service-recommendation-v1_and_v2_75_25.yml -n tutorial
+----
+
+发送请求测试
+
+[source, bash,subs="+macros,+attributes"]
+----
+for i in `seq 1 20`;do curl $INGRESS_HOST:$INGRESS_PORT;sleep 1;done
 ----
 
 Clean up
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl delete -f istiofiles/virtual-service-recommendation-v1_and_v2_75_25.yml -n tutorial{namespace-suffix}
-istioctl delete -f istiofiles/destination-rule-recommendation-v1-v2.yml -n tutorial{namespace-suffix}
+istioctl delete -f istiofiles/virtual-service-recommendation-v1_and_v2_75_25.yml -n tutorial
+istioctl delete -f istiofiles/destination-rule-recommendation-v1-v2.yml -n tutorial
 ----
 
-
-or you can run:
-
-[source, bash,subs="+macros,+attributes"]
-----
-./scripts/clean.sh tutorial{namespace-suffix}
-----
