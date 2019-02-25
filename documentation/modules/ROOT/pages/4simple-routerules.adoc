@@ -72,47 +72,67 @@ curl http://$INGRESS_HOST:$INGRESS_PORT
 
 [source,bash, subs="+macros,+attributes"]
 ----
-curl http://customer-tutorial{namespace-suffix}.{appdomain}
+#curl $INGRESS_HOST:$INGRESS_PORT
+customer => preference => recommendation v1 from '76d747d99f-25h79': 181
 ----
 
-you likely see "customer =&gt; preference =&gt; recommendation v2 from '2819441432-5v22s': 1" as by default you get round-robin load-balancing when there is more than one Pod behind a Service
+你也可以在响应中看到 `v2 from 'bbb595df6-gm8v4'` 字符串, `recommendation-v2-bbb595df6-gm8v4` 是 pod 的第三个字段 replicaset 的随机字符串
 
-Send several requests to see their responses:
+```
+# curl $INGRESS_HOST:$INGRESS_PORT
+customer => preference => recommendation v2 from 'bbb595df6-gm8v4': 4
+```
+
+
 
 [source, bash, subs="+macros,+attributes"]
 ----
 ./scripts/run.sh http://customer-tutorial{namespace-suffix}.{appdomain}
 ----
 
-The default Kubernetes/OpenShift behavior is to round-robin load-balance across all available pods behind a single Service. Add another replica of recommendation-v2 Deployment.
+kubernetes 默认的负载均衡策略是 round-robin 所有的可用 pods 在一个 service 中. 我们添加一个 v2 的 pod 测试
 
 [source,bash,subs="+macros,+attributes"]
 ----
-oc scale --replicas=2 deployment/recommendation-v2 -n tutorial{namespace-suffix}
-or
-kubectl scale --replicas=2 deployment/recommendation-v2 -n tutorial{namespace-suffix}
+kubectl scale --replicas=2 deployment/recommendation-v2 -n tutorial
 ----
 
-Now, you will see two requests into the v2 and one for v1.
+我们可以在结果中查看出负载均衡策略
 
 [source,bash]
 ----
-customer => preference => recommendation v1 from '2819441432-qsp25': 29
-customer => preference => recommendation v2 from '99634814-sf4cl': 37
-customer => preference => recommendation v2 from '99634814-sf4cl': 38
+# kubectl get pod
+NAME                                 READY   STATUS    RESTARTS   AGE
+customer-57774fb87f-zm4xz            2/2     Running   0          3h39m
+preference-v1-9588dbcd5-npt66        2/2     Running   0          3h35m
+recommendation-v1-76d747d99f-25h79   2/2     Running   0          173m
+recommendation-v2-bbb595df6-92tjz    2/2     Running   0          25s
+recommendation-v2-bbb595df6-gm8v4    2/2     Running   0          15m
+
+# curl $INGRESS_HOST:$INGRESS_PORT
+customer => preference => recommendation v1 from '76d747d99f-25h79': 184
+
+# curl $INGRESS_HOST:$INGRESS_PORT
+customer => preference => recommendation v2 from 'bbb595df6-92tjz': 1
+
+# curl $INGRESS_HOST:$INGRESS_PORT
+customer => preference => recommendation v2 from 'bbb595df6-gm8v4': 7
+
+# curl $INGRESS_HOST:$INGRESS_PORT
+customer => preference => recommendation v1 from '76d747d99f-25h79': 185
+
+# curl $INGRESS_HOST:$INGRESS_PORT
+customer => preference => recommendation v2 from 'bbb595df6-92tjz': 2
 ----
 
-Scale back to a single replica of the recommendation-v2 Deployment
+将 v2 版本的 pod 缩减到原来的 1个
 
 [source,bash,subs="+macros,+attributes"]
 ----
-oc scale --replicas=1 deployment/recommendation-v2 -n tutorial{namespace-suffix}
-or
-kubectl scale --replicas=1 deployment/recommendation-v2 -n tutorial{namespace-suffix}
+kubectl scale --replicas=1 deployment/recommendation-v2 -n tutorial
 ----
 
-ifndef::workshop[]
-and back to the main directory
+回到主目录
 
 [source,bash]
 ----
