@@ -9,13 +9,16 @@ include::_attributes.adoc[]
 while true;do curl $INGRESS_HOST:$INGRESS_PORT;sleep 2;done
 ```
 
-使用 node port 暴漏 grafana
+使用 node port 暴漏 grafana,prometheus
 
 ```
 kubectl -n istio-system expose deployment grafana --port=3000 --target-port=3000 --protocol=TCP --name=grafana-nodeport --type=NodePort
-# kubectl get svc -n istio-system grafana-nodeport 
-NAME               TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
-grafana-nodeport   NodePort   10.107.217.218   <none>        3000:32040/TCP   45s
+kubectl -n istio-system expose deployment prometheus --port=9090 --target-port=9090 --protocol=TCP --name=prometheus-nodeport --type=NodePort
+# kubectl get svc -n istio-system grafana-nodeport prometheus-nodeport
+NAME                  TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+grafana-nodeport      NodePort   10.107.217.218   <none>        3000:32040/TCP   45m
+NAME                  TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+prometheus-nodeport   NodePort   10.111.145.47    <none>        9090:32530/TCP   9s
 ```
 
 可以再 grafana 中观察以下 url
@@ -47,7 +50,7 @@ Istio还允许您指定可在Prometheus仪表板内查看的自定义指标，
 [source,bash,subs="+macros,+attributes"]
 ----
 
-http://nodeip:32040/graph?g0.range_input=1m&g0.stacked=1&g0.expr=&g0.tab=0
+http://nodeip:32530/graph?g0.range_input=1m&g0.stacked=1&g0.expr=&g0.tab=0
 ----
 
 添加一个自定义的 metric 和 rule. 首先你应该再 istio-tutorial 主目录
@@ -57,16 +60,15 @@ http://nodeip:32040/graph?g0.range_input=1m&g0.stacked=1&g0.expr=&g0.tab=0
 istioctl create -f istiofiles/recommendation_requestcount.yml -n istio-system
 ----
 
-In the Prometheus dashboard, add the following
+再 Prometheus 中查询以下指标
 
 [source,bash]
 ----
 istio_requests_total{destination_service="recommendation.tutorial.svc.cluster.local"}
 ----
 
-and select `Execute`
+点击 `Execute`
 
-image:prometheus_custom_metric.png[alt text]
 
 Then run several requests through the system
 
