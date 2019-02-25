@@ -8,7 +8,7 @@ include::_attributes.adoc[]
 - siege
 - git
 - maven
-- [stern](https://github.com/wercker/stern)
+- https://github.com/wercker/stern[stern]
 
 [source,bash]
 ----
