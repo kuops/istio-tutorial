@@ -94,20 +94,16 @@ cd ../../..
 [#deploypreference]
 == Deploy preference
 
-=== Preference build using Docker daemon
+=== 构建 preference 服务的 docker 镜像
 
 [source,bash,subs="+macros,+attributes"]
 ----
 cd preference/java/springboot
 mvn clean package
-docker build -t example/preference:v1 .
-docker images | grep preference
+docker build -t kuopsme/reahat.istio.preference:v1 .
+docker images | grep reahat.istio.preference
 
-oc apply -f <(istioctl kube-inject -f link:{github-repo}/{preference-repo}/kubernetes/Deployment.yml[../../kubernetes/Deployment.yml]) -n tutorial
-oc create -f link:{github-repo}/{preference-repo}/kubernetes/Service.yml[../../kubernetes/Service.yml]
-
-or
-
+sed -i 's@example/preference:v1@kuopsme/reahat.istio.customer:v1@g'  ../../kubernetes/Deployment.yml
 kubectl apply -f <(istioctl kube-inject -f link:{github-repo}/{preference-repo}/kubernetes/Deployment.yml[../../kubernetes/Deployment.yml]) -n tutorial
 kubectl create -f link:{github-repo}/{preference-repo}/kubernetes/Service.yml[../../kubernetes/Service.yml]
 ----
