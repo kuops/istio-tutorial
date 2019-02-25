@@ -12,6 +12,24 @@ kubectl create namespace tutorial
 kubectl config set-context $(kubectl config current-context) --namespace=tutorial
 ----
 
+允许内部服务使用 `ISTIO_MUTUAL` 方式进行认证
+
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "DestinationRule"
+metadata:
+  name: "default"
+  namespace: "tutorial"
+spec:
+  host: "*.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+EOF
+```
+
+
 克隆源代码
 
 [source,bash]
