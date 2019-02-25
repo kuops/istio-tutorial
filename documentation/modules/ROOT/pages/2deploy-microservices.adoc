@@ -28,8 +28,8 @@ NOTE: Your very first Docker build will take a bit of time as it downloads all t
 ----
 cd customer/java/springboot
 mvn clean package
-docker build -t example/customer .
-docker images | grep customer
+docker build -t docker build -t kuopsme/reahat.istio.customer .
+docker images | grep reahat.istio.customer
 ----
 
 Now let's deploy the customer pod with its sidecar
