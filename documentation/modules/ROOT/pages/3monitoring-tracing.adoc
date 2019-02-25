@@ -4,30 +4,25 @@ include::_attributes.adoc[]
 [#monitoring]
 == Monitoring
 
+使用 node port 暴漏 grafana
+
+```
+kubectl -n istio-system expose deployment grafana --port=3000 --target-port=3000 --protocol=TCP --name=grafana-nodeport --type=NodePort
+# kubectl get svc -n istio-system grafana-nodeport 
+NAME               TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+grafana-nodeport   NodePort   10.107.217.218   <none>        3000:32040/TCP   45s
+```
+
 Out of the box, you get monitoring via Prometheus and Grafana. 
 
 [source,bash,subs="+macros,+attributes"]
 ----
-ifdef::workshop[]
-open http://grafana-istio-system.{appdomain}/d/1/istio-dashboard?refresh=5s&orgId=1
-endif::workshop[]
-
-ifndef::workshop[]
-open "$(minishift openshift service grafana -u)/d/1/istio-dashboard?refresh=5s&orgId=1"
-endif::workshop[]
+http://nodeip:32040/d/1/istio-dashboard?refresh=5s&orgId=1
 ----
-
-image:grafana1.png[Gragana 1]
 
 [source,bash,subs="+macros,+attributes"]
 ----
-ifdef::workshop[]
-http://grafana-istio-system.{appdomain}/d/UbsSZTDik/istio-workload-dashboard?refresh=5s&orgId=1"
-endif::workshop[]
-
-ifndef::workshop[]
-open "$(minishift openshift service grafana -u)/d/UbsSZTDik/istio-workload-dashboard?refresh=5s&orgId=1"
-endif::workshop[]
+http://nodeip:32040/d/UbsSZTDik/istio-workload-dashboard?refresh=5s&orgId=1"
 ----
 
 to check the "Workload of the services"
