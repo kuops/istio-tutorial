@@ -32,8 +32,8 @@ docker build -t kuopsme/reahat.istio.recommendation:v2 .
 docker push kuopsme/reahat.istio.recommendation:v2
 
 # docker images | grep recommendation
-kuopsme/reahat.istio.recommendation   v2                  4dcdd98d1a96        24 minutes ago      449MB
-kuopsme/reahat.istio.recommendation   v1                  12ae5ff9e87b        2 hours ago         449MB
+kuopsme/reahat.istio.recommendation   v2                  3531fadb7787        5 minutes ago       449MB
+kuopsme/reahat.istio.recommendation   v1                  12ae5ff9e87b        3 hours ago         449MB
 ----
 
 IMPORTANT: We have a 2nd Deployment to manage the v2 version of recommendation. 
@@ -53,12 +53,12 @@ Wait for those pods to show "2/2", the istio-proxy/envoy sidecar is part of that
 
 [source,bash,subs="+macros,+attributes"]
 ----
-oc get pods -w -n tutorial{namespace-suffix}
-NAME                                  READY     STATUS    RESTARTS   AGE
-customer-3600192384-fpljb             2/2       Running   0          17m
-preference-243057078-8c5hz           2/2       Running   0          15m
-recommendation-v1-60483540-9snd9     2/2       Running   0          12m
-recommendation-v2-2815683430-vpx4p   2/2       Running   0         15s
+# kubectl get pod
+NAME                                 READY   STATUS    RESTARTS   AGE
+customer-57774fb87f-zm4xz            2/2     Running   0          3h26m
+preference-v1-9588dbcd5-npt66        2/2     Running   0          3h21m
+recommendation-v1-76d747d99f-25h79   2/2     Running   0          160m
+recommendation-v2-bbb595df6-gm8v4    2/2     Running   0          2m26s
 ----
 
 and test the customer endpoint
