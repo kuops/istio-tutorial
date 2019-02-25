@@ -20,10 +20,14 @@ grafana-nodeport   NodePort   10.107.217.218   <none>        3000:32040/TCP   45
 
 可以再 grafana 中观察以下 url
 
+istio-mesh-dashboard
+
 [source,bash,subs="+macros,+attributes"]
 ----
 http://nodeip:32040/d/1/istio-dashboard?refresh=5s&orgId=1
 ----
+
+istio-workload-dashboard
 
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -32,7 +36,6 @@ http://nodeip:32040/d/UbsSZTDik/istio-workload-dashboard?refresh=5s&orgId=1"
 
 to check the "Workload of the services"
 
-image:grafana2.png[Grafana 2]
 
 // Custom Metrics removed because it requires access to istio-system.
 ifndef::workshop[] 
