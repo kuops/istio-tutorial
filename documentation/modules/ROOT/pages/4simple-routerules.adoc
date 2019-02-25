@@ -8,10 +8,13 @@ ifndef::workshop[]
 [#deployrecommendationv2]
 == Create recommendation:v2
 
-We can experiment with Istio controlling traffic by making a change to `RecommendationVerticle.java` like the following and creating a "v2" docker image.
+更改 `RecommendationVerticle.java` 的以下行, 将 v1 改为 v2 并创建 "v2" docker image.
 
 [source,java]
 ----
+vim recommendation/java/vertx/src/main/java/com/redhat/developer/demos/recommendation/RecommendationVerticle.java 
+
+# 第 18 行
 private static final String RESPONSE_STRING_FORMAT = "recommendation v2 from '%s': %d\n";
 ----
 
@@ -25,50 +28,24 @@ There is also a second `deployment.yml` file to label things correctly
 ----
 cd recommendation/java/vertx
 mvn clean package
+docker build -t kuopsme/reahat.istio.recommendation:v2 .
+docker push kuopsme/reahat.istio.recommendation:v2
 
-docker build -t example/recommendation:v2 .
-
-docker images | grep recommendation
-example/recommendation                  v2                  c31e399a9628        5 seconds ago       438MB
-example/recommendation                  v1                  f072978d9cf6        8 minutes ago      438MB
+# docker images | grep recommendation
+kuopsme/reahat.istio.recommendation   v2                  4dcdd98d1a96        24 minutes ago      449MB
+kuopsme/reahat.istio.recommendation   v1                  12ae5ff9e87b        2 hours ago         449MB
 ----
 
 IMPORTANT: We have a 2nd Deployment to manage the v2 version of recommendation. 
 
+创建 v2 的 deployment.yaml
+
 [source,bash,subs="+macros,+attributes"]
 ----
-oc apply -f <(istioctl kube-inject -f link:{github-repo}/{recommendation-repo}/kubernetes/Deployment-v2.yml[../../kubernetes/Deployment-v2.yml]) -n tutorial
-oc get pods -w -n tutorial
-
-or
-
-kubectl apply -f <(istioctl kube-inject -f link:{github-repo}/{recommendation-repo}/kubernetes/Deployment-v2.yml[../../kubernetes/Deployment-v2.yml]) -n tutorial
+sed -i 's@example/recommendation:v2@kuopsme/reahat.istio.recommendation:v2@g'  ../../kubernetes/Deployment-v2.yml
+kubectl apply -f <(istioctl kube-inject -f ../../kubernetes/Deployment-v2.yml) -n tutorial
 kubectl get pods -w -n tutorial
 ----
-
-=== OpenShift S2I strategy (if you DON'T have access to Docker daemon)
-
-[source, bash]
-----
-mvn clean package -f recommendation/java/vertx
-oc new-app -l app=recommendation,version=v2 --name=recommendation-v2 --context-dir=recommendation/java/vertx -e JAEGER_SERVICE_NAME=recommendation JAEGER_ENDPOINT=http://jaeger-collector.istio-system.svc:14268/api/traces JAEGER_PROPAGATION=b3 JAEGER_SAMPLER_TYPE=const JAEGER_SAMPLER_PARAM=1 JAVA_OPTIONS='-Xms128m -Xmx256m -Djava.net.preferIPv4Stack=true' fabric8/s2i-java~https://github.com/redhat-developer-demos/istio-tutorial -o yaml  > recommendation-v2.yml
-oc apply -f <(istioctl kube-inject -f recommendation-v2.yml) -n tutorial
-oc cancel-build bc/recommendation-v2 -n tutorial
-oc delete svc/recommendation-v2 -n tutorial
-oc start-build recommendation-v2 --from-dir=. --follow -n tutorial
-----
-
-endif::workshop[]
-
-ifdef::workshop[]
-== Deploy Recommendation microservice V2 using an existing image
-
-[source,bash,subs="+macros,+attributes"]
-----
-oc apply -f <(istioctl kube-inject -f link:{github-repo}/{recommendation-repo}/kubernetes/Deployment-v2.remote.yml[{recommendation-repo}/kubernetes/Deployment-v2.remote.yml]) -n tutorial{namespace-suffix}
-----
-endif::workshop[]
-
 
 === Wait for v2 to be deployed
 
@@ -88,7 +65,7 @@ and test the customer endpoint
 
 [source,bash,subs="+macros,+attributes"]
 ----
-curl http://customer-tutorial{namespace-suffix}.{appdomain}
+curl http://$INGRESS_HOST:$INGRESS_PORT
 ----
 
 you likely see "customer =&gt; preference =&gt; recommendation v1 from '99634814-d2z2t': 3", where '99634814-d2z2t' is the pod running v1 and the 3 is basically the number of times you hit the endpoint.
