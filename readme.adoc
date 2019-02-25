@@ -10,7 +10,7 @@ customer → preference → recommendation
 
 toc::[]
 
-include::documentation/modules/ROOT/pages/1setup.adoc[1.环境准备]
+[1.环境准备](documentation/modules/ROOT/pages/1setup.adoc)
 
 include::documentation/modules/ROOT/pages/2deploy-microservices.adoc[2.部署微服务]
 
