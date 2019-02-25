@@ -33,7 +33,7 @@ docker images | grep reahat.istio.customer
 docker push kuopsme/reahat.istio.customer
 ----
 
-Now let's deploy the customer pod with its sidecar
+现在部署 customer pod 和 sidecar 容器
 
 [source,bash,subs="+macros,+attributes"]
 ----
@@ -44,7 +44,7 @@ kubectl create -f link:{github-repo}/{customer-repo}/kubernetes/Service.yml[../.
 
 === Expose customer
 
-Since the `customer` service is the one our users will interact with, let's add an OpenShift Route that exposes that endpoint.
+ `customer` service 使用 noedport 方式进行暴漏
 
 [source,bash]
 ----
@@ -57,14 +57,14 @@ IMPORTANT: If your pod fails with `ImagePullBackOff`, it's possible that your cu
 
 Wait until the status is `Running` and there are `2/2` pods in the `Ready` column. To exit, press `Ctrl+C`
 
-Then test the customer endpoint
+访问 url 测试
 
 [source,bash]
 ----
 curl nodeip:31477
 ----
 
-You should see the following error because the services `preference` and `recommendation` are not yet deployed.
+你可以看到如下错误输出，因为 services `preference` 和 `recommendation` 并没有部署.
 
 ----
 customer => I/O error on GET request for "http://preference:8080": preference; nested exception is java.net.UnknownHostException: preference
