@@ -215,61 +215,46 @@ cd ../../..
 
 IMPORTANT: The tag `v1` at the end of the image name matters. We will be creating a `v2` version of `recommendation` later in this tutorial. Having both a `v1` and `v2` version of the `recommendation` code will allow us to exercise some interesting aspects of Istio's capabilities.
 
-=== Recommendation build using Docker daemon
+=== Recommendation build docker 镜像，并部署
 
 [source,bash,subs="+macros,+attributes"]
 ----
 cd recommendation/java/vertx
 mvn clean package
-docker build -t example/recommendation:v1 .
-docker images | grep recommendation
+docker build -t kuopsme/reahat.istio.recommendation:v1 .
+docker images | grep kuopsme/reahat.istio.recommendation
+docker push kuopsme/reahat.istio.recommendation:v1
 
-oc apply -f <(istioctl kube-inject -f link:{github-repo}/{recommendation-repo}/kubernetes/Deployment.yml[../../kubernetes/Deployment.yml]) -n tutorial
-oc create -f link:{github-repo}/{recommendation-repo}/kubernetes/Service.yml[../../kubernetes/Service.yml] -n tutorial
-oc get pods -w
-
-or 
-
-kubectl apply -f <(istioctl kube-inject -f link:{github-repo}/{recommendation-repo}/kubernetes/Deployment.yml[../../kubernetes/Deployment.yml]) -n tutorial
-kubectl create -f link:{github-repo}/{recommendation-repo}/kubernetes/Service.yml[../../kubernetes/Service.yml]
+sed -i 's@example/recommendation:v1@kuopsme/reahat.istio.recommendation:v1@g'  ../../kubernetes/Deployment.yml 
+kubectl apply -f <(istioctl kube-inject -f ../../kubernetes/Deployment.yml) -n tutorial
+kubectl create -f ../../kubernetes/Service.yml -n tutorial
 kubectl get pods -w
-----
-
-=== Recommendation build using OpenShift S2I strategy
-
-[source, bash]
-----
-cd recommendation/java/vertx
-oc new-app -l app=recommendation,version=v1 --name=recommendation-v1 --context-dir=recommendation/java/vertx JAVA_OPTIONS='-Xms128m -Xmx256m -Djava.net.preferIPv4Stack=true' fabric8/s2i-java~https://github.com/redhat-developer-demos/istio-tutorial -o yaml  > recommendation.yml
-oc apply -f <(istioctl kube-inject -f recommendation.yml) -n tutorial
-oc delete svc/recommendation-v1 -n tutorial; oc create -f ../../kubernetes/Service.yml -n tutorial
-oc logs bc/recommendation-v1 -f -n tutorial
 ----
 
 === Wait recommendation to be deployed
 
-Wait until the status is `Running` and there are `2/2` pods in the `Ready` column. To exit, press `Ctrl+C`
+等到状态变为 `Running` 并且 pods  `就绪` 列为 `2/2` . To exit, press `Ctrl+C`
 
 [source,bash]
 ----
-curl customer-tutorial.$(minishift ip).nip.io
+curl $INGRESS_HOST:$INGRESS_PORT
 ----
 
-it should now return
+正常应该返回如下结果:
 
 [source,bash]
 ----
-customer => preference => recommendation v1 from '99634814-sf4cl': 1
+customer => preference => recommendation v1 from '76d747d99f-25h79': 1
 ----
 
-and you can monitor the `recommendation` logs with
+同样可以查看  `recommendation` 的日志
 
 [source,bash]
 ----
 stern $(kubectl get pods|grep recommendation-v1|awk '{ print $1 }'|head -1) -c recommendation
 ----
 
-Back to the main `istio-tutorial` directory
+返回 `istio-tutorial` 主目录
 
 [source,bash]
 ----
