@@ -37,6 +37,7 @@ Now let's deploy the customer pod with its sidecar
 
 [source,bash,subs="+macros,+attributes"]
 ----
+sed -i 's@example/customer:latest@kuopsme/reahat.istio.customer:latest@g' ../../kubernetes/Deployment.yml
 kubectl apply -f <(istioctl kube-inject -f link:{github-repo}/{customer-repo}/kubernetes/Deployment.yml[../../kubernetes/Deployment.yml]) -n tutorial
 kubectl create -f link:{github-repo}/{customer-repo}/kubernetes/Service.yml[../../kubernetes/Service.yml] -n tutorial
 ----
