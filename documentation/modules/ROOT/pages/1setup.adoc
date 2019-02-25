@@ -7,7 +7,12 @@ include::_attributes.adoc[]
 - istio
 - siege `apt-get install siege`
 - git `apt-get install git`
-- maven `apt-get install maven`
+- maven 
+```
+apt-get install maven
+echo "export JAVA_HOME=/usr/lib/jvm/default-java" > /etc/profile.d/maven.sh
+source  /etc/profile.d/maven.sh
+```
 - https://github.com/wercker/stern[stern] 
 ```
 wget https://github.com/wercker/stern/releases/download/1.10.0/stern_linux_amd64
