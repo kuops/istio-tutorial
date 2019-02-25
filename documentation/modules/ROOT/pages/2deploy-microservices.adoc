@@ -48,15 +48,9 @@ Since the `customer` service is the one our users will interact with, let's add 
 
 [source,bash]
 ----
-oc expose service customer -n tutorial
-
-oc get route -n tutorial
-oc get pods -w -n tutorial
-
-or
-
-kubectl get route -o=jsonpath='{.items[0].spec.host}'
-kubectl get pods -w
+# kubectl get svc 
+NAME       TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+customer   NodePort   10.100.6.212   <none>        8080:31477/TCP   9m52s
 ----
 
 IMPORTANT: If your pod fails with `ImagePullBackOff`, it's possible that your current terminal isn't using the proper Docker Environment. See link:#setup-environment[Setup environment].
@@ -67,7 +61,7 @@ Then test the customer endpoint
 
 [source,bash]
 ----
-curl customer-tutorial.$(minishift ip).nip.io
+curl nodeip:31477
 ----
 
 You should see the following error because the services `preference` and `recommendation` are not yet deployed.
