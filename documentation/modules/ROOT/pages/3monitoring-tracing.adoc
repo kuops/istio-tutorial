@@ -4,6 +4,11 @@ include::_attributes.adoc[]
 [#monitoring]
 == Monitoring
 
+写个循环,另起一个窗口模拟访问
+```
+while true;do curl $INGRESS_HOST:$INGRESS_PORT;sleep 2;done
+```
+
 使用 node port 暴漏 grafana
 
 ```
@@ -13,7 +18,7 @@ NAME               TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AG
 grafana-nodeport   NodePort   10.107.217.218   <none>        3000:32040/TCP   45s
 ```
 
-Out of the box, you get monitoring via Prometheus and Grafana. 
+可以再 grafana 中观察以下 url
 
 [source,bash,subs="+macros,+attributes"]
 ----
