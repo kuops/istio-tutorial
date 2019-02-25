@@ -7,6 +7,5 @@ spec:
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
-  trafficPolicy:
     loadBalancer:
       simple: RANDOM
