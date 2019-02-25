@@ -29,6 +29,44 @@ spec:
 EOF
 ```
 
+使用 istio-gateway 访问服务
+
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: my-gateway
+  namespace: "tutorial"
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: customer
+  namespace: "tutorial"
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - my-gateway
+  http:
+  - route:
+    - destination:
+        host: customer
+        port:
+          number: 8080
+EOF
+```
 
 克隆源代码
 
@@ -56,30 +94,29 @@ docker push kuopsme/reahat.istio.customer
 [source,bash,subs="+macros,+attributes"]
 ----
 sed -i 's@example/customer:latest@kuopsme/reahat.istio.customer:latest@g' ../../kubernetes/Deployment.yml
-kubectl apply -f <(istioctl kube-inject -f link:{github-repo}/{customer-repo}/kubernetes/Deployment.yml[../../kubernetes/Deployment.yml]) -n tutorial
-kubectl create -f link:{github-repo}/{customer-repo}/kubernetes/Service.yml[../../kubernetes/Service.yml] -n tutorial
+kubectl apply -f <(istioctl kube-inject -f ../../kubernetes/Deployment.yml) -n tutorial
+kubectl create -f ../../kubernetes/Service.yml -n tutorial
 ----
 
 === Expose customer
 
- `customer` service 使用 noedport 方式进行暴漏
+ `customer` service 使用 ingress-gateway 方式进行暴漏
 
 [source,bash]
 ----
-# kubectl get svc 
-NAME       TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
-customer   NodePort   10.100.6.212   <none>        8080:31477/TCP   9m52s
+export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
+export INGRESS_HOST=$(kubectl get po -l istio=ingressgateway -n istio-system -o 'jsonpath={.items[0].status.hostIP}')
 ----
 
 IMPORTANT: If your pod fails with `ImagePullBackOff`, it's possible that your current terminal isn't using the proper Docker Environment. See link:#setup-environment[Setup environment].
 
 Wait until the status is `Running` and there are `2/2` pods in the `Ready` column. To exit, press `Ctrl+C`
 
-访问 url 测试
+访问 url 测试,默认地址为 31380
 
 [source,bash]
 ----
-curl nodeip:31477
+curl $INGRESS_HOST:$INGRESS_PORT
 ----
 
 你可以看到如下错误输出，因为 services `preference` 和 `recommendation` 并没有部署.
@@ -140,10 +177,10 @@ Wait until the status is `Running` and there are `2/2` pods in the `Ready` colum
 
 [source,bash]
 ----
-curl nodeip:31477
+curl $INGRESS_HOST:$INGRESS_PORT
 ----
 
-It will respond with an error since the service `recommendation` is not yet deployed.
+返回结果如下，返回 一个错误，因为 `recommendation` 服务没有部署
 
 NOTE: We could make this a bit more resilient in a future iteration of this tutorial
 
