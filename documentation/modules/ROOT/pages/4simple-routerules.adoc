@@ -146,17 +146,17 @@ endif::workshop[]
 [#alltorecommendationv2]
 === All users to recommendation:v2
 
-From the main istio-tutorial directory,
+将所有的 istio 到达 recommendation 服务的流量都导入到 v2 版本
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl create -f link:{github-repo}/{istiofiles-dir}/destination-rule-recommendation-v1-v2.yml[istiofiles/destination-rule-recommendation-v1-v2.yml] -n tutorial{namespace-suffix}
-istioctl create -f link:{github-repo}/{istiofiles-dir}/virtual-service-recommendation-v2.yml[istiofiles/virtual-service-recommendation-v2.yml] -n tutorial{namespace-suffix}
+kubectl apply -f istiofiles/destination-rule-recommendation-v1-v2.yml -n tutorial
+kubectl apply -f istiofiles/virtual-service-recommendation-v2.yml -n tutorial
 
-curl http://customer-tutorial{namespace-suffix}.{appdomain}
+curl $INGRESS_HOST:$INGRESS_PORT
 ----
 
-you should only see v2 being returned
+你应该只看到返回结果中只有 `v2`
 
 [#alltorecommendationv1]
 === All users to recommendation:v1
