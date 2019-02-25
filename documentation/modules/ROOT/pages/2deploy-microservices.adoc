@@ -70,21 +70,21 @@ curl nodeip:31477
 customer => I/O error on GET request for "http://preference:8080": preference; nested exception is java.net.UnknownHostException: preference
 ----
 
-Also review the logs
+也可以使用以下方式查看 log
 
 [source,bash]
 ----
 stern $(kubectl get pods|grep customer|awk '{ print $1 }'|head -1) -c customer
 ----
 
-You should see a stacktrace containing this cause:
+你应该跟踪到以下关键信息:
 
 [source,bash]
 ----
 org.springframework.web.client.ResourceAccessException: I/O error on GET request for "http://preference:8080": preference; nested exception is java.net.UnknownHostException: preference
 ----
 
-Back to the main istio-tutorial directory
+返回 istio-tutorial 主目录
 
 [source,bash]
 ----
