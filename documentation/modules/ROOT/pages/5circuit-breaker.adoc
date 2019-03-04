@@ -148,7 +148,7 @@ public void start() throws Exception {
 }
 ----
 
-Rebuild and redeploy
+重新编译，并部署
 
 [source,bash]
 ----
