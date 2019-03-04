@@ -124,13 +124,13 @@ customer => preference => recommendation v1 from '76d747d99f-25h79': 22
 [#timeout]
 == Timeout
 
-Wait only N seconds before giving up and failing. At this point, no other virtual service nor destination rule (in `tutorial` namespace) should be in effect. To check it run `istioctl get virtualservice` `istioctl get destinationrule` and if so `istioctl delete virtualservice virtualservicename -n tutorial` and `istioctl delete destinationrule destinationrulename -n tutorial`
-
-ifndef::workshop[]
-First, introduce some wait time in `recommendation v2` by uncommenting the line that calls the `timeout()` method. Update `RecommendationVerticle.java` making it a slow performer with a 3 second delay.
+在放弃或失败前等待 N 秒.
+首先，`recommendation v2` 通过取消注释调用该 `timeout()` 方法的行来引入一些等待时间。更新 `RecommendationVerticle.java` 使其表现缓慢，延迟时间为3秒。
 
 [source,java]
 ----
+vim recommendation/java/vertx/src/main/java/com/redhat/developer/demos/recommendation/RecommendationVerticle.java
+
 @Override
 public void start() throws Exception {
     Router router = Router.router(vertx);
@@ -156,12 +156,12 @@ cd recommendation/java/vertx
 
 mvn clean package
 
-docker build -t example/recommendation:v2 .
+docker build -t kuopsme/reahat.istio.recommendation:v2 .
 
-docker images | grep recommendation
+docker images | grep kuopsme/reahat.istio.recommendation
 
-oc delete pod -l app=recommendation,version=v2 -n tutorial
-or
+docker push kuopsme/reahat.istio.recommendation:v2
+
 kubectl delete pod -l app=recommendation,version=v2 -n tutorial
 
 cd ../../..
