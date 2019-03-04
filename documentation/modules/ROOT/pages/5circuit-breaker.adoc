@@ -14,7 +14,7 @@ include::_attributes.adoc[]
 kubectl exec -it $(kubectl get pods|grep recommendation-v2|awk '{ print $1 }'|head -1) -c recommendation /bin/bash
 ----
 
-You will be inside the application container of your pod `recommendation-v2-2036617847-spdrb`. Now execute:
+你现在应该已经进入 pod 的容器 `recommendation-v2-2036617847-spdrb` 中. 现在执行:
 
 [source,bash]
 ----
