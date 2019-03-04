@@ -1,17 +1,6 @@
 = Service Resiliency
 include::_attributes.adoc[]
 
-[IMPORTANT]
-.Before Start
-====
-You should have NO virtualservice nor destinationrule (in `tutorial` namespace) `istioctl get virtualservice` `istioctl get destinationrule` 
-if so run:
-
-[source, bash,subs="+macros,+attributes"]
-----
-./scripts/clean.sh tutorial{namespace-suffix}
-----
-====
 
 [#retry]
 == Retry
