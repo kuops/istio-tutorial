@@ -2,18 +2,16 @@
 include::_attributes.adoc[]
 
 
-[#retry]
-== Retry
+[#重试]
+== 重试
 
-Instead of failing immediately, retry the Service N more times
+不要马上返回失败，而应该重试该服务 n 次以上
 
-We will make pod recommendation-v2 fail 100% of the time. Get one of the pod names from your system and replace on the following command accordingly:
+我们将让 pod recommendation-v2 在百分之百的时间内返回失败. 使用以下命令获取 pod 名称
 
 [source,bash]
 ----
-oc exec -it $(oc get pods|grep recommendation-v2|awk '{ print $1 }'|head -1) -c recommendation /bin/bash
-or
-kubectl exec -it $(oc get pods|grep recommendation-v2|awk '{ print $1 }'|head -1) -c recommendation /bin/bash
+kubectl exec -it $(kubectl get pods|grep recommendation-v2|awk '{ print $1 }'|head -1) -c recommendation /bin/bash
 ----
 
 You will be inside the application container of your pod `recommendation-v2-2036617847-spdrb`. Now execute:
