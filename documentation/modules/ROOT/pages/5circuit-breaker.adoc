@@ -22,89 +22,79 @@ curl localhost:8080/misbehave
 exit
 ----
 
-This is a special endpoint that will make our application return only `503`s.
+这是一个特殊的 uri，可以让我们的程序只返回 `503`s.
 
-Now, if you hit the customer endpoint several times, you should see some 503's
+现在你访问 customer 服务, 你应该可以看到一些 503's
 
 [source,bash, subs="+macros,+attributes"]
 ----
-./scripts/run.sh http://customer-tutorial{namespace-suffix}.{appdomain}
+# for i in `seq 1 10`;do curl $INGRESS_HOST:$INGRESS_PORT;done
 
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 864
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 865
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 866
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 867
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 868
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 869
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
+customer => 503 preference => 503 recommendation misbehavior from 'bbb595df6-gm8v4'
+customer => preference => recommendation v1 from '76d747d99f-25h79': 5
+customer => 503 preference => 503 recommendation misbehavior from 'bbb595df6-gm8v4'
+customer => preference => recommendation v1 from '76d747d99f-25h79': 6
+customer => 503 preference => 503 recommendation misbehavior from 'bbb595df6-gm8v4'
+customer => preference => recommendation v1 from '76d747d99f-25h79': 7
+customer => 503 preference => 503 recommendation misbehavior from 'bbb595df6-gm8v4'
+customer => preference => recommendation v1 from '76d747d99f-25h79': 8
+customer => 503 preference => 503 recommendation misbehavior from 'bbb595df6-gm8v4'
+customer => preference => recommendation v1 from '76d747d99f-25h79': 9
 ----
 
-Now add the retry rule
+现在我们添加一条重试规则
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl create -f link:{github-repo}/{istiofiles-dir}/virtual-service-recommendation-v2_retry.yml[istiofiles/virtual-service-recommendation-v2_retry.yml] -n tutorial{namespace-suffix}
+istioctl create -f istiofiles/virtual-service-recommendation-v2_retry.yml -n tutorial
 ----
 
-You will see it work every time because Istio will retry the recommendation service and it will land on v1 only.
+你现在应该看到每次请求都是有效的，因为 Istio 将重试 recommendation 服务并且只能在 `v1` 登录.
 
 [source,bash,subs="+macros,+attributes"]
 ----
-./scripts/run.sh http://customer-tutorial{namespace-suffix}.{appdomain}
+# for i in `seq 1 3`;do curl $INGRESS_HOST:$INGRESS_PORT;done
 
-customer => preference => recommendation v1 from '2036617847-m9glz': 196
-customer => preference => recommendation v1 from '2036617847-m9glz': 197
-customer => preference => recommendation v1 from '2036617847-m9glz': 198
+customer => preference => recommendation v1 from '76d747d99f-25h79': 10
+customer => preference => recommendation v1 from '76d747d99f-25h79': 11
+customer => preference => recommendation v1 from '76d747d99f-25h79': 12
 ----
 
-You can see the active Virtual Services via
+你可以查看当前正在使用的  virtualservice
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl get virtualservices -n tutorial{namespace-suffix}
+istioctl get virtualservices -n tutorial recommendation -o yaml
 ----
 
-Now, delete the retry rule and see the old behavior, where v2 throws 503s
+现在我们删除重试规则返回之前的状态, v2 将返回 503
 
 [source,bash,subs="+macros,+attributes"]
 ----
-istioctl delete virtualservice recommendation -n tutorial{namespace-suffix}
+istioctl delete virtualservice recommendation -n tutorial
 
-./scripts/run.sh http://customer-tutorial{namespace-suffix}.{appdomain}
+# for i in `seq 1 10`;do curl $INGRESS_HOST:$INGRESS_PORT;done
 
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 1118
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 1119
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 1120
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 1121
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 1122
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 1123
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 1124
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 1125
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
-customer => preference => recommendation v1 from 'b87789c58-h9r4s': 1126
-customer => 503 preference => 503 recommendation misbehavior from '6f64f9c5b-ltrhl'
+customer => 503 preference => 503 recommendation misbehavior from 'bbb595df6-gm8v4'
+customer => preference => recommendation v1 from '76d747d99f-25h79': 13
+customer => 503 preference => 503 recommendation misbehavior from 'bbb595df6-gm8v4'
+customer => preference => recommendation v1 from '76d747d99f-25h79': 14
+customer => 503 preference => 503 recommendation misbehavior from 'bbb595df6-gm8v4'
+customer => preference => recommendation v1 from '76d747d99f-25h79': 15
+customer => 503 preference => 503 recommendation misbehavior from 'bbb595df6-gm8v4'
+customer => preference => recommendation v1 from '76d747d99f-25h79': 16
+customer => 503 preference => 503 recommendation misbehavior from 'bbb595df6-gm8v4'
+customer => preference => recommendation v1 from '76d747d99f-25h79': 17
 ----
 
-Now, make the pod v2 behave well again
+现在我们将 v2 pod 恢复正常
 
 [source,bash,subs="+macros,+attributes"]
 ----
-oc exec -it $(oc get pods|grep recommendation-v2|awk '{ print $1 }'|head -1) -c recommendation /bin/bash
-or
-kubectl exec -it $(oc get pods|grep recommendation-v2|awk '{ print $1 }'|head -1) -c recommendation /bin/bash
+kubectl exec -it $(kubectl get pods|grep recommendation-v2|awk '{ print $1 }'|head -1) -c recommendation /bin/bash
 ----
 
-You will be inside the application container of your pod `recommendation-v2-2036617847-spdrb`. Now execute:
+我们在 v2 的 pod 中执行:
 
 [source,bash]
 ----
@@ -112,15 +102,22 @@ curl localhost:8080/behave
 exit
 ----
 
-The application is back to random load-balancing between v1 and v2
+现在程序应该随机返回负载均衡的 v1 and v2
 
 [source,bash,subs="+macros,+attributes"]
 ----
-./scripts/run.sh
+# for i in `seq 1 10`;do curl $INGRESS_HOST:$INGRESS_PORT;done
 
-customer => preference => recommendation v1 from '2039379827-h58vw': 129
-customer => preference => recommendation v2 from '2036617847-m9glz': 207
-customer => preference => recommendation v1 from '2039379827-h58vw': 130
+customer => preference => recommendation v2 from 'bbb595df6-gm8v4': 1
+customer => preference => recommendation v1 from '76d747d99f-25h79': 18
+customer => preference => recommendation v2 from 'bbb595df6-gm8v4': 2
+customer => preference => recommendation v1 from '76d747d99f-25h79': 19
+customer => preference => recommendation v2 from 'bbb595df6-gm8v4': 3
+customer => preference => recommendation v1 from '76d747d99f-25h79': 20
+customer => preference => recommendation v2 from 'bbb595df6-gm8v4': 4
+customer => preference => recommendation v1 from '76d747d99f-25h79': 21
+customer => preference => recommendation v2 from 'bbb595df6-gm8v4': 5
+customer => preference => recommendation v1 from '76d747d99f-25h79': 22
 ----
 
 // Needs a modified image
